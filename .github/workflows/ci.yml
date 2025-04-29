@@ -26,7 +26,7 @@ jobs:
 
     - name: Run linter
       run: |
-        pylint --disable=missing-docstring,broad-except ./bot.py
+        pylint --disable=missing-docstring,broad-except ./main.py
 
     - name: Run tests
       env:
