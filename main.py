@@ -1,7 +1,6 @@
 import os
 import logging
-import sys  
-from typing import Any  
+import sys
 import telebot
 from telebot import types
 from xkcdpass import xkcd_password
@@ -31,13 +30,13 @@ class XKCDPasswordGenerator:
     def __init__(self, filename: str = "wordlist.txt"):
         try:
             self.wordlist = xkcd_password.generate_wordlist(
-                wordfile=filename, 
-                valid_chars="[a-z]", 
-                min_length=4, 
+                wordfile=filename,
+                valid_chars="[a-z]",
+                min_length=4,
                 max_length=10,
             )
         except Exception as error:
-            logger.error("Ошибка загрузки wordlist:", error)
+            logger.error("Ошибка загрузки wordlist: %s", error)
             raise
 
     def generate(self, complexity: str = "normal") -> str:
@@ -45,29 +44,29 @@ class XKCDPasswordGenerator:
         try:
             if complexity == "weak":
                 return xkcd_password.generate_xkcdpassword(
-                    self.wordlist, 
-                    numwords=2, 
+                    self.wordlist,
+                    numwords=2,
                     delimiter=""
                 )
-            elif complexity == "normal":
+            if complexity == "normal":
                 return xkcd_password.generate_xkcdpassword(
-                    self.wordlist, 
-                    numwords=3, 
-                    case="random", 
+                    self.wordlist,
+                    numwords=3,
+                    case="random",
                     random_delimiters=True,
                     valid_delimiters=self.DELIMITERS_NUMBERS
                 )
-            elif complexity == "strong":
+            if complexity == "strong":
                 return xkcd_password.generate_xkcdpassword(
-                    self.wordlist, 
-                    numwords=4, 
-                    case="random", 
+                    self.wordlist,
+                    numwords=4,
+                    case="random",
                     random_delimiters=True,
                     valid_delimiters=self.DELIMITERS_FULL
                 )
             return ""
         except Exception as error:
-            logger.error("Ошибка генерации пароля:", error)
+            logger.error("Ошибка генерации пароля: %s", error)
             return "Произошла ошибка при генерации пароля"
 
 class PasswordBot:
@@ -77,7 +76,7 @@ class PasswordBot:
         try:
             self.generator = XKCDPasswordGenerator()
         except Exception as error:
-            logger.error("Не удалось инициализировать генератор паролей:", error)
+            logger.error("Не удалось инициализировать генератор паролей: %s", error)
             raise
         self.setup_handlers()
 
@@ -103,7 +102,7 @@ class PasswordBot:
             callback_data="generate"
         )
         markup.add(btn_generate)
-        
+
         welcome_text = (
             "🔐 *Генератор XKCD-паролей*\n\n"
             "Я создаю легко запоминающиеся, но надежные пароли.\n\n"
@@ -111,7 +110,7 @@ class PasswordBot:
             "/password - Выбрать сложность пароля\n"
             "/help - Показать это сообщение"
         )
-        
+
         try:
             self.bot.send_message(
                 message.chat.id,
@@ -120,7 +119,7 @@ class PasswordBot:
                 reply_markup=markup
             )
         except Exception as error:
-            logger.error("Ошибка отправки приветствия:", error)
+            logger.error("Ошибка отправки приветствия: %s", error)
 
     def send_password_options(self, message):
         """Отправка вариантов сложности пароля"""
@@ -129,7 +128,7 @@ class PasswordBot:
         btn_normal = types.InlineKeyboardButton("Обычный", callback_data="normal")
         btn_strong = types.InlineKeyboardButton("Сложный", callback_data="strong")
         markup.add(btn_weak, btn_normal, btn_strong)
-        
+
         try:
             self.bot.send_message(
                 message.chat.id,
@@ -137,7 +136,7 @@ class PasswordBot:
                 reply_markup=markup
             )
         except Exception as error:
-            logger.error("Ошибка отправки вариантов пароля:", error)
+            logger.error("Ошибка отправки вариантов пароля: %s", error)
 
     def handle_password_generation(self, call):
         """Обработка выбора сложности пароля"""
@@ -150,7 +149,7 @@ class PasswordBot:
                     "normal": "🔐 Обычный пароль",
                     "strong": "🔒 Сложный пароль"
                 }[complexity]
-                
+
                 response = (
                     f"{complexity_name}:\n`{password}`\n\n"
                     "Сохраните его в безопасном месте!"
@@ -161,10 +160,10 @@ class PasswordBot:
                     text=response,
                     parse_mode='Markdown'
                 )
-            elif complexity == "generate":
+            if complexity == "generate":
                 self.send_password_options(call.message)
         except Exception as error:
-            logger.error("Ошибка обработки callback:", error)
+            logger.error("Ошибка обработки callback: %s", error)
             self.bot.answer_callback_query(
                 call.id,
                 "Произошла ошибка при генерации пароля",
@@ -177,7 +176,7 @@ class PasswordBot:
         try:
             self.bot.polling(none_stop=True, interval=0)
         except Exception as error:
-            logger.error("Ошибка в работе бота:", error)
+            logger.error("Ошибка в работе бота: %s", error)
             raise
 
 if __name__ == '__main__':
@@ -185,5 +184,5 @@ if __name__ == '__main__':
         bot = PasswordBot(TOKEN)
         bot.run()
     except Exception as error:
-        logger.critical("Критическая ошибка:", error)
+        logger.critical("Критическая ошибка: %s", error)
         sys.exit(1)
