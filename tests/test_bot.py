@@ -1,5 +1,5 @@
 import pytest
-from bot import XKCDPasswordGenerator
+from main import XKCDPasswordGenerator
 
 def test_password_generation():
     generator = XKCDPasswordGenerator()
