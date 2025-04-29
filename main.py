@@ -1,9 +1,11 @@
-import telebot
-from xkcdpass import xkcd_password
-from telebot import types
-from dotenv import load_dotenv
 import os
 import logging
+import sys  
+from typing import Any  
+import telebot
+from telebot import types
+from xkcdpass import xkcd_password
+from dotenv import load_dotenv
 
 # Настройка логирования
 logging.basicConfig(
@@ -18,7 +20,7 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 if not TOKEN:
     logger.error("Токен бота не найден! Проверьте .env файл.")
-    exit(1)
+    sys.exit(1)
 
 class XKCDPasswordGenerator:
     """Генератор паролей в стиле XKCD"""
@@ -34,8 +36,8 @@ class XKCDPasswordGenerator:
                 min_length=4, 
                 max_length=10,
             )
-        except Exception as e:
-            logger.error(f"Ошибка загрузки wordlist: {e}")
+        except Exception as error:
+            logger.error("Ошибка загрузки wordlist:", error)
             raise
 
     def generate(self, complexity: str = "normal") -> str:
@@ -64,8 +66,8 @@ class XKCDPasswordGenerator:
                     valid_delimiters=self.DELIMITERS_FULL
                 )
             return ""
-        except Exception as e:
-            logger.error(f"Ошибка генерации пароля: {e}")
+        except Exception as error:
+            logger.error("Ошибка генерации пароля:", error)
             return "Произошла ошибка при генерации пароля"
 
 class PasswordBot:
@@ -74,8 +76,8 @@ class PasswordBot:
         self.bot = telebot.TeleBot(token)
         try:
             self.generator = XKCDPasswordGenerator()
-        except Exception as e:
-            logger.error(f"Не удалось инициализировать генератор паролей: {e}")
+        except Exception as error:
+            logger.error("Не удалось инициализировать генератор паролей:", error)
             raise
         self.setup_handlers()
 
@@ -117,8 +119,8 @@ class PasswordBot:
                 parse_mode='Markdown',
                 reply_markup=markup
             )
-        except Exception as e:
-            logger.error(f"Ошибка отправки приветствия: {e}")
+        except Exception as error:
+            logger.error("Ошибка отправки приветствия:", error)
 
     def send_password_options(self, message):
         """Отправка вариантов сложности пароля"""
@@ -134,8 +136,8 @@ class PasswordBot:
                 "🔒 Выберите сложность пароля:",
                 reply_markup=markup
             )
-        except Exception as e:
-            logger.error(f"Ошибка отправки вариантов пароля: {e}")
+        except Exception as error:
+            logger.error("Ошибка отправки вариантов пароля:", error)
 
     def handle_password_generation(self, call):
         """Обработка выбора сложности пароля"""
@@ -161,8 +163,8 @@ class PasswordBot:
                 )
             elif complexity == "generate":
                 self.send_password_options(call.message)
-        except Exception as e:
-            logger.error(f"Ошибка обработки callback: {e}")
+        except Exception as error:
+            logger.error("Ошибка обработки callback:", error)
             self.bot.answer_callback_query(
                 call.id,
                 "Произошла ошибка при генерации пароля",
@@ -174,14 +176,14 @@ class PasswordBot:
         logger.info("Бот запущен...")
         try:
             self.bot.polling(none_stop=True, interval=0)
-        except Exception as e:
-            logger.error(f"Ошибка в работе бота: {e}")
+        except Exception as error:
+            logger.error("Ошибка в работе бота:", error)
             raise
 
 if __name__ == '__main__':
     try:
         bot = PasswordBot(TOKEN)
         bot.run()
-    except Exception as e:
-        logger.critical(f"Критическая ошибка: {e}")
-        exit(1)
+    except Exception as error:
+        logger.critical("Критическая ошибка:", error)
+        sys.exit(1)

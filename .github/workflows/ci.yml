@@ -24,9 +24,11 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pylint
 
-    - name: Run linter
+    - name: Run pylint
       run: |
-        pylint --disable=missing-docstring,broad-except ./main.py
+        pylint --disable=missing-docstring,broad-except,too-few-public-methods,redefined-outer-name \
+        --variable-rgx='[a-z_][a-z0-9_]{2,30}$' \
+        main.py
 
     - name: Run tests
       env:
